@@ -69,6 +69,7 @@ export default function HomeScreen() {
             {isConnected ? connectedDevice?.name?.slice(0, 18) : 'Not connected'}
           </Text>
         </View>
+        <View style={{ flexDirection: 'row' }}>
         <TouchableOpacity
           testID="scan-link-btn"
           onPress={() => router.push('/scan')}
@@ -76,6 +77,12 @@ export default function HomeScreen() {
         >
           <Ionicons name="bluetooth" size={20} color={isConnected ? COLORS.success : '#fff'} />
         </TouchableOpacity>
+        {isConnected && (
+          <TouchableOpacity testID="disconnect-btn" onPress={disconnect} style={[styles.iconBtn, { marginLeft: 8 }]}>
+            <Ionicons name="close" size={20} color={COLORS.error} />
+          </TouchableOpacity>
+        )}
+        </View>
       </View>
 
       <ScrollView
@@ -183,9 +190,7 @@ export default function HomeScreen() {
         )}
 
         {isConnected && (
-          <TouchableOpacity testID="disconnect-btn" style={styles.disconnect} onPress={disconnect}>
-            <Text style={styles.disconnectText}>Disconnect</Text>
-          </TouchableOpacity>
+          <View testID="bottom-disconnect-spacer" style={{ height: 8 }} />
         )}
       </ScrollView>
 
