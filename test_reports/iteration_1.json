@@ -1,0 +1,34 @@
+{
+  "summary": "Frontend-only testing of EXO Lightstick Expo web preview at 390x844. All 4 screens (home/scan/modes/concert) load. All required testIDs present. Members modal, modes navigation, concert BPM/toggle, scan + mock-connect flow all work. Connection badge correctly transitions Not connected -> green 'EXO Fanlight Ver.3' after tapping a device. Color updates via member preset confirmed (#ACC6E7 -> #0066CC after suho).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "home/disconnect-btn", "issue": "After connecting via /scan, disconnect-btn is rendered conditionally but not visible in the initial viewport because it's the last element in the ScrollView (below the action row + preset chip). Need to scroll to reveal. Consider moving it higher or making it sticky so users can find it.", "testID": "disconnect-btn", "priority": "MEDIUM"},
+      {"component": "HueSlider", "issue": "Two elements with data-testid='hue-slider' rendered on web (PanResponder duplication). Causes Playwright strict-mode failures and could confuse a11y. Likely the wrap View testID is duplicated by react-native-web PanResponder wrapper. Drag interaction itself appears functional but should use unique testID or scope to .first().", "testID": "hue-slider", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "home", "issues": ["Lightstick gem renders in pale/desaturated tone for default pearl-blue (#ACC6E7); the LinearGradient blends with white making the visualizer look gray rather than glowing blue. Consider stronger color stop weighting."]}
+    ],
+    "react_native_issues": [
+      {"component": "Lightstick + others", "issue": "Console warnings: 'shadow* style props are deprecated. Use boxShadow' and 'props.pointerEvents is deprecated. Use style.pointerEvents'. Non-blocking but should be cleaned up for RN 0.76+/web compatibility."}
+    ]
+  },
+  "test_report_links": [],
+  "action_items": [
+    "Fix duplicate data-testid='hue-slider' on web (move testID to a unique inner element or use a single wrapper).",
+    "Make disconnect-btn more discoverable (place near header connection badge or sticky footer).",
+    "Replace deprecated shadow* props with boxShadow and pointerEvents prop with style.pointerEvents in Lightstick.tsx and HueSlider.tsx."
+  ],
+  "critical_code_review_comments": [
+    "BLEContext sendColor effect on home/index.tsx fires on every slider movement - fine for mock, but on native it will spam BLE writes. Consider throttling/debouncing (e.g., 50ms) before merging real BLE.",
+    "MEMBER_COLORS list only yielded 9/10 ids when probing common spellings; verify 'd.o.' member id naming used in theme.ts is consistent with what the spec calls 'dyo'."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (not requested)", "frontend": "~92%"},
+  "seed_data_creation": "None",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Use viewport 390x844. Public URL https://stick-glow-app.preview.emergentagent.com. BLE is mocked on web (3 fake devices, ~1.8s scan delay). For hue-slider drag tests use locator(...).first() because testID is duplicated. Disconnect button only appears at bottom of ScrollView after connect - scroll down to find it.",
+  "rca_of_issue": "Duplicate hue-slider testID likely caused by react-native-web rendering both an outer View and an inner PanResponder-bound View when using {...pan.panHandlers} on the same element that owns onLayout + testID; verify by inspecting the rendered DOM or moving testID to a child."
+}
